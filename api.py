@@ -9,22 +9,25 @@ import h5py
 import pandas as pd
 import numpy as np
 
-def getFluorescenceTraces(NWB_file):
+
+def get_fluorescence_traces(NWB_file):
     '''returns an array of fluorescence traces for all ROI and the timestamps for each datapoint'''
     f = h5py.File(NWB_file, 'r')
     timestamps = f['processing']['cortical_activity_map_pipeline']['Fluorescence']['ROI Masks']['timestamps'].value
     celltraces = f['processing']['cortical_activity_map_pipeline']['Fluorescence']['ROI Masks']['data'].value 
     f.close()
     return timestamps, celltraces
-    
-def getMaxProjection(NWB_file):
+
+
+def get_max_projection(NWB_file):
     '''returns the maximum projection image for the 2P data'''
     f = h5py.File(NWB_file, 'r')
     max_projection = f['processing']['cortical_activity_map_pipeline']['ImageSegmentation']['ROI Masks']['reference_images']['maximum_intensity_projection_image']['data'].value
     f.close()
     return max_projection
 
-def getStimulusTable(NWB_file):
+
+def get_stimulus_table(NWB_file):
     '''returns a DataFrame of the stimulus condtions'''
     f = h5py.File(NWB_file, 'r')
     stim_data = f['stimulus']['presentation']['drifting_gratings_stimulus']['data'].value
@@ -33,7 +36,8 @@ def getStimulusTable(NWB_file):
     f.close()
     return stimulus_table
 
-def getROImask(NWB_file):
+
+def get_roi_mask(NWB_file):
     '''returns an array of all the ROI masks'''
     f = h5py.File(NWB_file, 'r')
     mask_loc = f['processing']['cortical_activity_map_pipeline']['ImageSegmentation']['ROI Masks']
@@ -45,7 +49,8 @@ def getROImask(NWB_file):
     f.close()
     return roi_array
 
-def getMetaData(NWB_file):
+
+def get_meta_data(NWB_file):
     '''returns a dictionary of meta data associated with each experiment, including Cre line, specimen number, visual area imaged, imaging depth'''
     f = h5py.File(NWB_file, 'r')
     Cre = f['general']['specimen'].value.split('-')[0]
@@ -58,7 +63,7 @@ def getMetaData(NWB_file):
     meta ={'Cre': Cre, 'specimen':specimen, 'HVA':HVA, 'depth':depth, 'system':system, 'lims_id':lims_id}
     return meta
 
-def getRunningSpeed(NWB_file):
+def get_running_speed(NWB_file):
     '''returns the mouse running speed in cm/s'''
     f = h5py.File(NWB_file, 'r')
     dxcm = f['processing']['cortical_activity_map_pipeline']['BehavioralTimeSeries']['running_speed']['data'].value
@@ -76,7 +81,8 @@ def getRunningSpeed(NWB_file):
         dxcm = np.append(dxcm, np.repeat(np.NaN, adjust))
     return dxcm, dxtime
 
-def getMotionCorrection(NWB_file):
+
+def get_motion_correction(NWB_file):
     '''returns a DataFrame containing the x- and y- translation of each image used for image alignment'''
     f = h5py.File(NWB_file, 'r')
     motion_log = f['processing']['cortical_activity_map_pipeline']['MotionCorrection']['2p_image_series']['xy_translations']['data'].value
