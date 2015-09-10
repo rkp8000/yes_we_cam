@@ -44,6 +44,24 @@ class BasicFunctionsTestCase(unittest.TestCase):
         for chunk, start, end in zip(chunks, starts, ends):
             np.testing.assert_array_almost_equal(chunk, x[:, start:end])
 
+    def test_subtract_first(self):
+
+        x = np.array([[1, 2, 3, 4],
+                      [2, 3, 4, 5],
+                      [6, 7, 1, 4]])
+
+        # test dimension 0
+        x_correct = np.array([[0, 0, 0, 0],
+                              [1, 1, 1, 1],
+                              [5, 5, -2, 0]])
+        np.testing.assert_array_almost_equal(time_series.subtract_first(x, axis=0), x_correct)
+
+        # test dimension 1
+        x_correct = np.array([[0, 1, 2, 3],
+                              [0, 1, 2, 3],
+                              [0, 1, -5, -2]])
+        np.testing.assert_array_almost_equal(time_series.subtract_first(x, axis=1), x_correct)
+
 
 if __name__ == '__main__':
     unittest.main()

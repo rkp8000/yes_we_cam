@@ -51,3 +51,18 @@ def get_chunks(x, starts, ends, axis):
             chunks.append(x[:, start:end])
 
     return chunks
+
+
+def subtract_first(x, axis):
+    """
+    Subtract the first row, column, etc., from all rows, columns, etc., of an array.
+
+    :param x: array
+    :param axis: which axis to use
+    :return: x with first row, column, etc., subtracted
+    """
+
+    if axis == 0:
+        return x - np.tile(x[:1, :], (x.shape[0], 1))
+    elif axis == 1:
+        return x - np.tile(x[:, :1], (1, x.shape[1]))
