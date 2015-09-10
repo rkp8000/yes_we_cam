@@ -1,7 +1,7 @@
 from __future__ import division
 import unittest
 import numpy as np
-import fluorescence as fl
+import detrend as fl
 
 
 class BasicFunctionsTestCase(unittest.TestCase):
