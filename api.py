@@ -3,11 +3,23 @@
 Created on Fri Aug 14 14:04:24 2015
 
 @author: saskiad@alleninstitute.org
+
+@edited_by: rich
 Functions to extract relevant data from the CAM NWB files
 """
+import os
 import h5py
 import pandas as pd
 import numpy as np
+
+
+def get_nwb_paths(cam_dir):
+    """
+    Get a list of all the paths to the nwb files.
+    """
+    expt_ids = os.walk(cam_dir).next()[1]
+    expt_paths = [os.path.join(cam_dir, expt_id) for expt_id in expt_ids]
+    return [os.path.join(expt_path, expt_id + '.nwb') for expt_path, expt_id in zip(expt_paths, expt_ids)]
 
 
 def get_fluorescence_traces(NWB_file):
