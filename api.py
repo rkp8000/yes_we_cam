@@ -49,6 +49,20 @@ def get_stimulus_table(NWB_file):
     return stimulus_table
 
 
+def get_stimulus_conditions(NWB_file, include_blanks):
+    """
+    Get unique stimulus conditions.
+    :param NWB_file:
+    :return: dataframe of unique conditions
+    """
+    stim_conditions = get_stimulus_table(NWB_file)[['temporal_frequency', 'orientation']].drop_duplicates()
+
+    if include_blanks:
+        return stim_conditions
+    else:
+        return stim_conditions[~stim_conditions['temporal_frequency'].isnull()]
+
+
 def get_roi_mask(NWB_file):
     '''returns an array of all the ROI masks'''
     f = h5py.File(NWB_file, 'r')
