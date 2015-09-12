@@ -3,20 +3,20 @@ Metrics for experiments. To be possibly split into multiple files should it grow
 """
 from __future__ import division, print_function
 import numpy as np
+import pandas as pd
 
 import api
 import time_series
 
-NEURONS_PER_STIM = 10
 
-
-def mean_variability_stim_conditioned(nwb_file, detrend_window):
+def variability_stim_conditioned(nwb_file, detrend_window, neurons_per_stim):
     """
     Calculate the variability of neural responses conditioned on a specific stimulus, averaged over
     basically everything, for a single experiment.
     :param nwb_file: path to experiment's .nwb file
     :param detrend_window: window length (number of timesteps) to use when detrending fluorescence traces
-    :return scalar metric quantifying stim-conditioned variability
+    :return data frame where rows are stimuli and which has columns: temporal_frequency, orientation, variability,
+        most_active_neurons
     """
     print(nwb_file)
     # get and detrend fluorescence traces
@@ -31,7 +31,8 @@ def mean_variability_stim_conditioned(nwb_file, detrend_window):
     stim_conditions_df = api.get_stimulus_conditions(nwb_file, include_blanks=False)
     stim_conditions = [tuple(cond) for cond in stim_conditions_df.values]
 
-    time_averaged_stds_stim = []
+    df = pd.DataFrame(columns=['temporal_frequency', 'orientation', 'variability', 'most_active_neurons'])
+
     for tf, ori in stim_conditions:
         # get all start and end times for this stimulus
         mask = (stim_data['temporal_frequency'] == tf) & (stim_data['orientation'] == ori)
@@ -47,16 +48,20 @@ def mean_variability_stim_conditioned(nwb_file, detrend_window):
         responses_all = [time_series.subtract_first(response, axis=1) for response in responses_all]
         responsivenesses_trial = [np.abs(response).max(axis=1)[:, None] for response in responses_all]
         responsivenesses_stim = np.concatenate(responsivenesses_trial, axis=1).mean(axis=1)
-        most_active_neurons = np.argsort(responsivenesses_stim)[-NEURONS_PER_STIM:]
+        most_active_neurons = np.argsort(responsivenesses_stim)[-neurons_per_stim:]
 
         # get responses of active neurons only
         responses = [response[most_active_neurons, :] for response in responses_all]
 
         time_averaged_stds_neuron = []
-        for ctr in range(NEURONS_PER_STIM):
+        for ctr in range(neurons_per_stim):
             std = np.concatenate([response[ctr, :][None, :] for response in responses], axis=0).std(axis=0)
             time_averaged_stds_neuron.append(std.mean())
 
-        time_averaged_stds_stim.append(np.mean(time_averaged_stds_neuron))
+        data = {
+            'temporal_frequency': tf, 'orientation': ori, 'variability': np.mean(time_averaged_stds_neuron),
+            'most_active_neurons': most_active_neurons
+        }
+        df = df.append(data, ignore_index=True)
 
-    return np.mean(time_averaged_stds_stim)
+    return df
